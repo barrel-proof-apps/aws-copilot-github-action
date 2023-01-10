@@ -19,6 +19,9 @@ inputs:
   path:
     required: false
     description: "path name"
+  pat:
+    required: false
+    description: "github personal access token"
 
 runs:
   using: "node16"
