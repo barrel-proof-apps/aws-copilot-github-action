@@ -37,18 +37,8 @@ async function processCommand(command: string): Promise<void> {
  */
 async function install(): Promise<void> {
   core.info('Installing AWS Copilot...')
-  const pat = core.getInput("pat") || null
-  let handlers = []
-  let auth = null
-  if (pat) {
-    const requestHandler = new PersonalAccessTokenCredentialHandler(pat) 
-    handlers.push(requestHandler)
-    let options = {headers: {Authorization: ''}}
-    requestHandler.prepareRequest(options)
-    auth = options.headers['Authorization']
-  }
 
-  const version = core.getInput('version') || (await getLatestVersion(handlers))
+  const version = core.getInput('version') || (await getLatestVersion())
 
   const platform = os.platform()
   const packageUrl = `https://github.com/aws/copilot-cli/releases/download/${version}/copilot-${platform}-${version}`
@@ -58,7 +48,7 @@ async function install(): Promise<void> {
   let cliPath = find(COPILOT_CLI_TOOL_NAME, version)
 
   if (!cliPath) {
-    const downloadPath = await downloadTool(packageUrl, COPILOT_CLI_TOOL_NAME, auth)
+    const downloadPath = await downloadTool(packageUrl, COPILOT_CLI_TOOL_NAME)
     chmodSync(downloadPath, '755')
     cliPath = await cacheFile(
       downloadPath,
@@ -74,7 +64,15 @@ async function install(): Promise<void> {
   core.info('AWS Copilot CLI installed successfully')
 }
 
-async function getLatestVersion(handlers): Promise<string> {
+async function getLatestVersion(): Promise<string> {
+  const pat = core.getInput("pat") || null
+  let handlers = []
+  if (pat) {
+    core.info('using github personal access token')
+    const requestHandler = new PersonalAccessTokenCredentialHandler(pat) 
+    handlers.push(requestHandler)
+  }
+
   const http = new HttpClient('aws-copilot-release', handlers)
   const response = await http.getJson(
     'https://api.github.com/repos/aws/copilot-cli/releases/latest'
