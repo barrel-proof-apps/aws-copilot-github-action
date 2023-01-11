@@ -1,4 +1,5 @@
 import * as core from '@actions/core'
+import * as auth from '@actions/http-client/auth'
 import * as os from 'os'
 
 import { cacheFile, downloadTool, find } from '@actions/tool-cache'
@@ -69,7 +70,7 @@ async function getLatestVersion(): Promise<string> {
   let handlers = []
   if (pat) {
     core.info('using github personal access token')
-    const requestHandler = new PersonalAccessTokenCredentialHandler(pat) 
+    const requestHandler = new auth.PersonalAccessTokenCredentialHandler(pat) 
     handlers.push(requestHandler)
   } else {
     core.info('not using personal access token')
