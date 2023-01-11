@@ -71,6 +71,8 @@ async function getLatestVersion(): Promise<string> {
     core.info('using github personal access token')
     const requestHandler = new PersonalAccessTokenCredentialHandler(pat) 
     handlers.push(requestHandler)
+  } else {
+    core.info('not using personal access token')
   }
 
   const http = new HttpClient('aws-copilot-release', handlers)
